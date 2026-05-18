@@ -16,12 +16,14 @@ export default async function OverviewPage() {
   const { data: projects } = await admin.from("projects").select("id, team_id, name");
   const { data: tasks } = await admin.from("tasks").select("project_id, status, deadline");
 
-  const projectByTeam: Record<string, any[]> = {};
-  (projects || []).forEach((p) => {
+  type Proj = { id: string; team_id: string; name: string };
+  type TaskRow = { project_id: string; status: string; deadline: string | null };
+  const projectByTeam: Record<string, Proj[]> = {};
+  ((projects || []) as Proj[]).forEach((p) => {
     (projectByTeam[p.team_id] = projectByTeam[p.team_id] || []).push(p);
   });
   const taskStats = (project_id: string) => {
-    const list = (tasks || []).filter((t) => t.project_id === project_id);
+    const list = ((tasks || []) as TaskRow[]).filter((t) => t.project_id === project_id);
     return {
       total: list.length,
       todo: list.filter((t) => t.status === "TODO").length,
